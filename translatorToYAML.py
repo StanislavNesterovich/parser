@@ -1,5 +1,4 @@
 from configobj import ConfigObj
-import collections
 import yaml
 import re
 
@@ -19,7 +18,12 @@ def grepDefaultsValue():
             for key in re.findall("^\w+.\w+.(\w+)", i):
                 if key.find("volume") != -1:
                     for key2 in re.findall("^\w+.\w+.\w+.(\w+)", i):
-                        volumes_defaults.setdefault(key, []).append({key2: config.get(i)})
+                        try:
+                            volumes_defaults[key].update({key2:config.get(i)})
+                        except KeyError:
+                            volumes_defaults[key] = {}
+                            volumes_defaults[key].update({key2:config.get(i)})
+                        #volumes_defaults.setdefault(key, []).append({key2: config.get(i)})
                 else:
                     defaults.update({key: config.get(i)})
 
@@ -44,60 +48,54 @@ def grepValuesForNode():
                 for key in re.findall("^\w+.\w+.\w+.(\w+)", i):
                     if key.find("volume") != -1:
                         for key2 in re.findall("^\w+.\w+.\w+.\w+.(\w+)", i):
-                            volumes.setdefault(key, []).append({key2: config.get(i)})
+                            try:
+                                volumes[key].update({key2: config.get(i)})
+                            except KeyError:
+                                volumes[key] = {}
+                                volumes[key].update({key2: config.get(i)})
                     else:
                         values.update({key: config.get(i)})
 
-
-                           # print key2
-                            # values.setdefault()
-
-
         if values.__len__() > 0:
-            print values.values()
-            stackname.setdefault(nodename, []).append(values.copy())
-            values.clear()
+            try:
+                stackname[nodename].update(values.items())
+            except KeyError:
+                stackname[nodename] = {}
+                stackname[nodename].update(values.items())
         else:
             pass
-
         if volumes.__len__() > 0:
-            stackname.setdefault(nodename, []).append(volumes.copy())
+            try:
+                stackname[nodename]["volumes"].update(volumes.items())
+            except KeyError:
+                stackname[nodename]["volumes"] = {}
+                stackname[nodename]["volumes"].update(volumes.items())
             volumes.clear()
         else:
             pass
-
-
-
-
-
-# for i in keys:
-#     if "TenantName" in i:
-#         yamlfile = {"tenant": config.get(i)}
-#     elif "deployCI" in i:
-#         for key in re.findall("^\w+.\w+.(\w+)", i):
-#             node.setdefault(key,[])
-#             if key.find("instance1") != -1:
-#                 for key3 in re.findall("^\w+.\w+.\w+.\w+.(\w+)", i):
-#                     pass
-#                 for key in re.findall("^\w+.\w+.\w+.(\w+)", i):
-#                     if key.find("volume") != -1:
-#                         for key2 in re.findall("^\w+.\w+.\w+.\w+.(\w+)",i):
-#                             volumes.setdefault(key,[]).append({key2:config.get(i)})
-#                     else:
-#                         for e in re.findall("^\w+.\w+.\w+.(\w+)", i):
-#                             stackname.update({e: config.get(i)})
-
-
 
 grepDefaultsValue()
 grepNodeNameAndTenant()
 grepValuesForNode()
 
-yamlfile.update({"tenant": tenant[0]})
-yamlfile.setdefault("deployCI",[]).append(stackname)
-yamlfile.setdefault("defaults", []).append(defaults)
-yamlfile.setdefault("defaults", []).append(volumes_defaults)
 
+yamlfile["defaults"] = {}
+yamlfile["defaults"].update(defaults.items())
+yamlfile["defaults"]["volumes"] = {}
 
+for i in volumes_defaults:
+    yamlfile["defaults"]["volumes"][i] = {}
+    yamlfile["defaults"]["volumes"][i].update(volumes_defaults[i].items())
+
+yamlfile["tenant"] = tenant[0]
+
+yamlfile["deployCI"] = {}
+for i in stackname:
+    yamlfile["deployCI"][i] = {}
+    yamlfile["deployCI"][i].update(stackname[i].items())
+    try:
+        yamlfile["deployCI"][i]["volumes"].update(stackname[i]["volumes"].items())
+    except KeyError:
+        pass
 
 yaml.dump(yamlfile, stream, default_flow_style=False)
