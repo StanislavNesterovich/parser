@@ -3,11 +3,27 @@ defaults:
   image_name: rhel7.2
   internal_network_name: inner-net_NC_ENG_IT_DPL
   keypair: tmp_key
+- volume1:
+  - mount_point: /dev/vdb
+  - size: '5'
+  - volume_type: ceph_nc_eng_it_dpl
 deployCI:
-- flavor: IaaS.Vcpu_4.ram_6
-  image_name: rhel7.2
-  internal_network_name: inner-net_NC_ENG_IT_DPL
-  ip: 10.103.0.60
-  keypair: tmp_key
-  volume1: '5'
+- instance1:
+  - flavor: IaaS.Vcpu_4.ram_6
+    image_name: rhel7.2
+    internal_network_name: inner-net_NC_ENG_IT_DPL
+    ip: 10.103.0.60
+    keypair: tmp_key
+  - volume1:
+    - volume_type: ceph_nc_eng_it_dpl
+    - mount_point: /dev/vdb
+    - size: '5'
+    volume2:
+    - volume_type: ceph_nc_eng_it_dpl
+    - mount_point: /dev/vdb
+    - size: '6'
+  instance2:
+  - flavor: IaaS.Vcpu_4.ram_6
+    internal_network_name: inner-net_NC_ENG_IT_DPL
+    ip: 10.103.0.60
 tenant: NC_ENG_IT_DPL
