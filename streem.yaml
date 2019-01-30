@@ -1,0 +1,7 @@
+deployCI:
+- instance1:
+    flavor: IaaS.Vcpu_4.ram_6
+    image_name: rhel7.2
+    internal_network_name: inner-net_NC_ENG_IT_DPL
+    ip: 10.103.0.60
+    keypair: tmp_key
