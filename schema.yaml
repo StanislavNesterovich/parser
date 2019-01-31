@@ -1,34 +1,85 @@
-tenant:
-  required: True
-  type: string
+type: map
+mapping:
+  tenant:
+    type: str
+    required: True
+  defaults:
+    type: map
+    required: True
+    mapping:
+      availability_zone:
+        required: True
+        type: str
+      flavor:
+        required: True
+        type: str
+      image_name:
+        required: True
+        type: str
+      internal_network_name:
+        required: True
+        type: str
+      keypair:
+        required: True
+        type: str
+      volumes:
+        required: False
+        type: map
+        mapping:
+          regex;(^volume\d):
+            required: True
+            type: map
+            mapping:
+              mount_point:
+                required: True
+              size:
+                required: True
+              volume_type:
+                required: True
+  deployCI:
+    required: True
+    type: map
+    mapping:
+      regex;():
+        required: True
+        type: map
+        mapping:
+          availability_zone:
+            required: False
+            type: str
+          ip:
+            required: False
+            type: str
+          flavor:
+            required: True
+            type: str
+          image_name:
+            required: True
+            type: str
+          internal_network_name:
+            required: True
+            type: str
+          keypair:
+            required: True
+            type: str
+          volumes:
+            required: False
+            type: map
+            mapping:
+              regex;(^volume\d):
+                required: True
+                type: map
+                mapping:
+                  mount_point:
+                    required: True
+                  size:
+                    required: True
+                  volume_type:
+                    required: True
 
-defaults:
-  required: True
-  type: dict
-  schema:
-    availability_zone:
-      required: True
-      type: string
-    flavor:
-      required: True
-      type: string
-    image_name:
-      required: True
-      type: string
-    internal_network_name:
-      required: True
-      type: string
-    keypair:
-      required: True
-      type: string
-    volumes:
-      required: False
-      type: dict
-      schema:
-        volume[0-1]:
-          required: True
 
 
 
-deployCI:
-  required: False
+
+
+
