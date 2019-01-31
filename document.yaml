@@ -1,5 +1,6 @@
 tenant: NC_ENG_IT_DPL
 defaults:
+  availability_zone: nova
   flavor: IaaS.Vcpu_4.ram_6
   image_name: rhel7.3
   internal_network_name: inner-net_NC_ENG_IT_DPL

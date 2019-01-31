@@ -89,11 +89,6 @@ for i in volumes_defaults:
     #yamlfile["defaults"]["volumes"].setdefault(i,[].append(volumes_defaults[i].items()))
     yamlfile["defaults"]["volumes"][i].update(volumes_defaults[i].items())
 
-
-
-
-
-
 yaml.dump({"tenant": tenant[0]},stream, default_flow_style=False)
 #yaml.dump({"defaults":defaults},stream, default_flow_style=False)
 yaml.dump(yamlfile, stream, default_flow_style=False)

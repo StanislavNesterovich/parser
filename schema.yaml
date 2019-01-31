@@ -6,6 +6,9 @@ defaults:
   required: True
   type: dict
   schema:
+    availability_zone:
+      required: True
+      type: string
     flavor:
       required: True
       type: string
