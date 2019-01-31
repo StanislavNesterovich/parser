@@ -1,0 +1,31 @@
+tenant:
+  required: True
+  type: string
+
+defaults:
+  required: True
+  type: dict
+  schema:
+    flavor:
+      required: True
+      type: string
+    image_name:
+      required: True
+      type: string
+    internal_network_name:
+      required: True
+      type: string
+    keypair:
+      required: True
+      type: string
+    volumes:
+      required: False
+      type: dict
+      schema:
+        volume[0-1]:
+          required: True
+
+
+
+deployCI:
+  required: False

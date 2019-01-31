@@ -1,3 +1,4 @@
+tenant: NC_ENG_IT_DPL
 defaults:
   flavor: IaaS.Vcpu_4.ram_6
   image_name: rhel7.3
@@ -38,4 +39,3 @@ deployCI:
     internal_network_name: inner-net_NC_ENG_IT_DPL
     ip: 10.103.0.60
     keypair: tmp_key
-tenant: NC_ENG_IT_DPL

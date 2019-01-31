@@ -10,8 +10,14 @@
            "image_name": {'required': True,"type": "string"},
            "internal_network_name": {"required": True, "type": "string"},
            "keypair": {"required": True, "type": "string"},
-           "volumes": {"required": False}
-        }
+           "volumes": {"required": False, "type": "dict",
+                       "valueschema":{"type": "dict"},
+                       "schema":
+                       {
+                       "volume1":{'required': True,}
+                       }
+           }
+           }
     },
     "deployCI": {"required": False}
 }

@@ -85,17 +85,16 @@ yamlfile["defaults"]["volumes"] = {}
 
 for i in volumes_defaults:
     yamlfile["defaults"]["volumes"][i] = {}
+    #volumes_defaults.setdefault(key, []).append({key2: config.get(i)})
+    #yamlfile["defaults"]["volumes"].setdefault(i,[].append(volumes_defaults[i].items()))
     yamlfile["defaults"]["volumes"][i].update(volumes_defaults[i].items())
 
-yamlfile["tenant"] = tenant[0]
 
-yamlfile["deployCI"] = {}
-for i in stackname:
-    yamlfile["deployCI"][i] = {}
-    yamlfile["deployCI"][i].update(stackname[i].items())
-    try:
-        yamlfile["deployCI"][i]["volumes"].update(stackname[i]["volumes"].items())
-    except KeyError:
-        pass
 
+
+
+
+yaml.dump({"tenant": tenant[0]},stream, default_flow_style=False)
+#yaml.dump({"defaults":defaults},stream, default_flow_style=False)
 yaml.dump(yamlfile, stream, default_flow_style=False)
+yaml.dump({"deployCI": stackname}, stream, default_flow_style=False)
