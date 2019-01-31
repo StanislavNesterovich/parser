@@ -22,9 +22,9 @@ def grepDefaultsValue(keys,config):
                 else:
                     defaults.update({key: config.get(i)})
 
-def grepNodeNameAndTenant(keys,config):
+def grepNodeNameAndTenant(keys,config,stack_name):
     for i in keys:
-        if "deployCI" in i:
+        if stack_name in i:
             for key in re.findall("^\w+.\w+.(\w+)", i):
                 if key in node:
                     pass
@@ -65,28 +65,30 @@ def grepValuesForNode(keys,config):
                 stackname[nodename]["volumes"].update(volumes.items())
             volumes.clear()
 
-def conver(path,path_yaml):
-    stream = file(path_yaml, 'w')
-    config = ConfigObj(path, write_empty_values=False)
-    yamlfile = dict()
-    keys = config.viewkeys()
+def conver(path,path_yaml,stack_name):
+    try:
+        stream = file(path_yaml, 'w')
+        config = ConfigObj(path, write_empty_values=False)
+        yamlfile = dict()
+        keys = config.viewkeys()
 
-    grepDefaultsValue(keys,config)
-    grepNodeNameAndTenant(keys, config)
-    grepValuesForNode(keys,config)
+        grepDefaultsValue(keys,config)
+        grepNodeNameAndTenant(keys, config,stack_name)
+        grepValuesForNode(keys,config)
 
-    yamlfile["defaults"] = {}
-    yamlfile["defaults"].update(defaults.items())
-    for i in volumes_defaults:
-        yamlfile["defaults"]["volumes"][i] = {}
-        if volumes_defaults[i].__len__() > 0:
-            yamlfile["defaults"]["volumes"] = {}
-            yamlfile["defaults"]["volumes"][i].update(volumes_defaults[i].items())
-
-    yaml.dump({"tenant": tenant[0]},stream, default_flow_style=False)
-    yaml.dump(yamlfile, stream, default_flow_style=False)
-    yaml.dump({"deployCI": stackname}, stream, default_flow_style=False)
-    return True
+        yamlfile["defaults"] = {}
+        yamlfile["defaults"].update(defaults.items())
+        for i in volumes_defaults:
+            yamlfile["defaults"]["volumes"][i] = {}
+            if volumes_defaults[i].__len__() > 0:
+                yamlfile["defaults"]["volumes"] = {}
+                yamlfile["defaults"]["volumes"][i].update(volumes_defaults[i].items())
+        yaml.dump({"tenant": tenant[0]},stream, default_flow_style=False)
+        yaml.dump(yamlfile, stream, default_flow_style=False)
+        yaml.dump({stack_name: stackname}, stream, default_flow_style=False)
+        return True
+    except:
+        return False
 
 def main():
   module = AnsibleModule(
@@ -104,7 +106,7 @@ def main():
   stack_name = module.params['stack_name']
   path_yaml = module.params['path_yaml']
 
-  if conver(path,path_yaml):
+  if conver(path,path_yaml,stack_name):
       msg = "box succesefull convert"
       module.exit_json(changed=False, msg=msg)
   else:
