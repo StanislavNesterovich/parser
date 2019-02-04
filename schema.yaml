@@ -1,3 +1,5 @@
+# Schema
+name: box schema
 type: map
 mapping:
   tenant:
@@ -31,10 +33,13 @@ mapping:
             type: map
             mapping:
               mount_point:
+                type: str
                 required: True
               size:
+                type: str
                 required: True
               volume_type:
+                type: str
                 required: True
   deployCI:
     required: True
