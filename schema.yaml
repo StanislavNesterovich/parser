@@ -41,7 +41,7 @@ mapping:
               volume_type:
                 type: str
                 required: True
-  deployCI:
+  deploy:
     required: True
     type: map
     mapping:

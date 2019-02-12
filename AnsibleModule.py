@@ -1,42 +1,62 @@
 #!/usr/bin/python
 from ansible.module_utils.basic import *
 from configobj import ConfigObj
-import yaml
-import re
+from validate import Validator
+import yaml, re, sys
 
-defaults = dict(); stackname = dict(); volumes = dict();  volumes_defaults = dict(); values = dict()
+yamlfile = dict()
+defaults = dict()
+stackname = dict()
+volumes = dict()
+volumes_defaults = dict()
+values = dict()
 tenant = list()
 node = list()
 
-def grepDefaultsValue(keys,config):
+
+def prevalidate(path):
+    configspec = ConfigObj("configspec.ini", interpolation=False, list_values=False, _inspec=True)
+    config = ConfigObj(path, configspec=configspec, write_empty_values=False)
+    validator = Validator()
+    result = config.validate(validator)
+    if result != True:
+        print 'Config file validation failed!'
+        sys.exit(1)
+    else:
+        keys = config.viewkeys()
+        return keys, config
+
+def grepDefaultsValue(keys, config):
     for i in keys:
-       if  "defaults" == i:
+       if ".defaults." in re.findall("[.]defaults[.]", i):
             for key in re.findall("^\w+.\w+.(\w+)", i):
                 if key.find("volume") != -1:
-                    for key2 in re.findall("^\w+.\w+.\w+.(\w+)", i):
+                    for key_volume_defaults in re.findall("^\w+.\w+.\w+.(\w+)", i):
                         try:
-                            volumes_defaults[key].update({key2:config.get(i)})
+                            volumes_defaults[key].update({key_volume_defaults:config.get(i)})
                         except KeyError:
                             volumes_defaults[key] = {}
-                            volumes_defaults[key].update({key2:config.get(i)})
+                            volumes_defaults[key].update({key_volume_defaults:config.get(i)})
                 else:
                     defaults.update({key: config.get(i)})
 
-def grepNodeNameAndTenant(keys,config,stack_name):
+
+def grepNodeNameAndTenant(keys, config, stack_name):
     for i in keys:
-        if stack_name == i:
+        if "." + stack_name + "." in re.findall("[.]" + stack_name + "[.]", i):
             for key in re.findall("^\w+.\w+.(\w+)", i):
                 if key in node:
                     pass
                 else:
                     node.append(key)
-        elif "TenantName" == i:
+        elif "TenantName" in i:
             if config.get(i) in tenant:
                 print "two TenantName in config"
             else:
                 tenant.append(config.get(i))
 
-def grepValuesForNode(keys,config):
+
+def grepValuesForNode(keys, config):
     for nodename in node:
         for i in keys:
             if i.find(nodename) != -1:
@@ -65,15 +85,14 @@ def grepValuesForNode(keys,config):
                 stackname[nodename]["volumes"].update(volumes.items())
             volumes.clear()
 
-def conver(path,path_yaml,stack_name):
-    stream = file(path_yaml, 'w')
-    config = ConfigObj(path, write_empty_values=False)
-    yamlfile = dict()
-    keys = config.viewkeys()
 
-    grepDefaultsValue(keys,config)
-    grepNodeNameAndTenant(keys, config,stack_name)
-    grepValuesForNode(keys,config)
+def conver(path, path_yaml, stack_name):
+    stream_to_yaml = file(path_yaml, 'w')
+    keys, config = prevalidate(path)
+
+    grepDefaultsValue(keys, config)
+    grepNodeNameAndTenant(keys, config, stack_name)
+    grepValuesForNode(keys, config)
 
     yamlfile["defaults"] = {}
     yamlfile["defaults"].update(defaults.items())
@@ -88,10 +107,11 @@ def conver(path,path_yaml,stack_name):
                    yamlfile["defaults"]["volumes"][i] = {}
                    yamlfile["defaults"]["volumes"][i].update(volumes_defaults[i].items())
 
-    yaml.dump({"tenant": tenant[0]},stream, default_flow_style=False)
-    yaml.dump(yamlfile, stream, default_flow_style=False)
-    yaml.dump({stack_name: stackname}, stream, default_flow_style=False)
+    yaml.dump({"tenant": tenant[0]}, stream_to_yaml, default_flow_style=False)
+    yaml.dump(yamlfile, stream_to_yaml, default_flow_style=False)
+    yaml.dump({stack_name: stackname}, stream_to_yaml, default_flow_style=False)
     return True
+
 
 def main():
   module = AnsibleModule(
@@ -109,12 +129,13 @@ def main():
   stack_name = module.params['stack_name']
   path_yaml = module.params['path_yaml']
 
-  if conver(path,path_yaml,stack_name):
+  if conver(path, path_yaml, stack_name):
       msg = "box succesefull convert"
       module.exit_json(changed=False, msg=msg)
   else:
       msg = "error convert"
       module.fail_json(failed=True,changed=False,msg=msg)
+
 
 if __name__ == '__main__':
   main()
